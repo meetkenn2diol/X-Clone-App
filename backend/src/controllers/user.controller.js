@@ -65,6 +65,10 @@ export const updateProfile = asyncHandler(async (req, res) => {
  * is retrieved from Clerk, transformed into the application's user structure,
  * and stored as a new MongoDB document.
  *
+ * @remarks
+ * After the user has been authenticated by Clerk, this function will be
+ * called to sync the user with the MongoDB database.
+ *
  * @route POST /api/users/sync
  * @access Private
  * @param {import('express').Request} req - Express request object containing Clerk authentication data.

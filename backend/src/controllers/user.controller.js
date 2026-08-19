@@ -26,6 +26,8 @@ export const getUserProfile = asyncHandler(async (req, res) => {
   res.status(200).json({ user });
 });
 
+
+
 /**
  * Updates the profile of the currently authenticated user.
  *
@@ -52,6 +54,8 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   res.status(200).json({ user });
 });
+
+
 
 /**
  * Synchronizes the authenticated Clerk user with the MongoDB database.
@@ -98,6 +102,8 @@ export const syncUser = asyncHandler(async (req, res) => {
   });
 });
 
+
+
 /**
  * Retrieves the profile of the currently authenticated user.
  *
@@ -118,6 +124,8 @@ export const getCurrentUser = asyncHandler(async (req, res) => {
 
   res.status(200).json({ user });
 });
+
+
 
 /**
  * Follows or unfollows a target user for the currently authenticated user.

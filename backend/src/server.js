@@ -9,6 +9,7 @@ import notificationRoutes from "./routes/notification.route.js";
 import { ENV } from "./config/env.js";
 import { connectDB } from "./config/db.js";
 import { arcjetMiddleware } from "./middleware/arcjet.middleware.js";
+import databaseMiddleware from "./middleware/database.middleware.js";
 
 // CONSTANTS
 const app = express();
@@ -21,10 +22,10 @@ app.use(arcjetMiddleware); //NOTE: arcjet is not invoked directly -missing brace
 
 // ROUTES
 app.get("/", (req, res) => res.send("Hello from server"));
-app.use("/api/users", userRoutes);
-app.use("/api/posts", postRoutes);
-app.use("/api/comments", commentRoutes);
-app.use("/api/notifications", notificationRoutes);
+app.use("/api/users", databaseMiddleware, userRoutes);
+app.use("/api/posts", databaseMiddleware, postRoutes);
+app.use("/api/comments", databaseMiddleware, commentRoutes);
+app.use("/api/notifications", databaseMiddleware, notificationRoutes);
 
 // ERROR HANDLING MIDDLEWARE
 app.use((err, req, res, next) => {
@@ -33,25 +34,39 @@ app.use((err, req, res, next) => {
 });
 
 //START SERVER
-const startServer = async () => {
-  try {
-    await connectDB();
+// const startServer = async () => {
+//   try {
+//     await connectDB();
 
-    // VERCEL doesn't want the server to listen for local development
-    // VERCEL provides the PORT so that the app doesn't have to listen for too long
-    // so it can handle many requests at once
-    // listen for local development
-    if (ENV.NODE_ENV !== "production") {
-      app.listen(ENV.PORT, () =>
-        console.log("✅ Server is up and running on PORT:", ENV.PORT),
-      );
-    }
-  } catch (error) {
-    console.error("❌ Failed to start server:", error.message);
-    process.exit(1);
-  }
-};
-startServer();  
+//     // Vercel doesn't require me to create and manage the listening server.
+//     // Vercel uses serverless functions
+//     // listen for local development
+//     if (ENV.NODE_ENV !== "production") {
+//       app.listen(ENV.PORT, () =>
+//         console.log("✅ Server is up and running on PORT:", ENV.PORT),
+//       );
+//     }
+//   } catch (error) {
+//     console.error("❌ Failed to start server:", error.message);
+//     process.exit(1);
+//   }
+// };
+// startServer();
+
+// LOCAL DEVELOPMENT
+if (ENV.NODE_ENV !== "production") {
+  connectDB()
+    .then(() => {
+      app.listen(ENV.PORT, () => {
+        console.log(`✅ Server is running on PORT: ${ENV.PORT}`);
+      });
+    })
+    .catch((error) => {
+      console.error("❌ Failed to start server:", error.message);
+      process.exit(1);
+    });
+}
+
 
 // EXPORT FOR VERCEL
 export default app;

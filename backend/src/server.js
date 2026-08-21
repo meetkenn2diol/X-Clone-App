@@ -10,17 +10,14 @@ import { ENV } from "./config/env.js";
 import { connectDB } from "./config/db.js";
 import { arcjetMiddleware } from "./middleware/arcjet.middleware.js";
 
-
 // CONSTANTS
 const app = express();
-
 
 // MIDDLEWARE
 app.use(cors());
 app.use(express.json());
 app.use(clerkMiddleware());
-app.use(arcjetMiddleware);
-
+app.use(arcjetMiddleware); //NOTE: arcjet is not invoked directly -missing braces () so that it is not executed immediately. instead it is passed as a reference to the express middleware.
 
 // ROUTES
 app.get("/", (req, res) => res.send("Hello from server"));
@@ -29,13 +26,11 @@ app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-
 // ERROR HANDLING MIDDLEWARE
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: err.message || "Internal server error" });
 });
-
 
 //START SERVER
 const startServer = async () => {
@@ -44,7 +39,9 @@ const startServer = async () => {
 
     // listen for local development
     if (ENV.NODE_ENV !== "production") {
-      app.listen(ENV.PORT, () => console.log("✅ Server is up and running on PORT:", ENV.PORT));
+      app.listen(ENV.PORT, () =>
+        console.log("✅ Server is up and running on PORT:", ENV.PORT),
+      );
     }
   } catch (error) {
     console.error("❌ Failed to start server:", error.message);
@@ -52,7 +49,6 @@ const startServer = async () => {
   }
 };
 startServer();
-
 
 // EXPORT FOR VERCEL
 export default app;

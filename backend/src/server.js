@@ -37,6 +37,9 @@ const startServer = async () => {
   try {
     await connectDB();
 
+    // VERCEL doesn't want the server to listen for local development
+    // VERCEL provides the PORT so that the app doesn't have to listen for too long
+    // so it can handle many requests at once
     // listen for local development
     if (ENV.NODE_ENV !== "production") {
       app.listen(ENV.PORT, () =>
@@ -48,7 +51,7 @@ const startServer = async () => {
     process.exit(1);
   }
 };
-startServer();
+startServer();  
 
 // EXPORT FOR VERCEL
 export default app;

@@ -49,5 +49,5 @@ if (ENV.NODE_ENV !== "production") {
 }
 
 
-// EXPORT FOR VERCEL
+// EXPORT FOR SERVERLESS PLATFORMS LIKE VERCEL
 export default app;

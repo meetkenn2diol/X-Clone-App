@@ -33,25 +33,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || "Internal server error" });
 });
 
-//START SERVER
-// const startServer = async () => {
-//   try {
-//     await connectDB();
-
-//     // Vercel doesn't require me to create and manage the listening server.
-//     // Vercel uses serverless functions
-//     // listen for local development
-//     if (ENV.NODE_ENV !== "production") {
-//       app.listen(ENV.PORT, () =>
-//         console.log("✅ Server is up and running on PORT:", ENV.PORT),
-//       );
-//     }
-//   } catch (error) {
-//     console.error("❌ Failed to start server:", error.message);
-//     process.exit(1);
-//   }
-// };
-// startServer();
 
 // LOCAL DEVELOPMENT
 if (ENV.NODE_ENV !== "production") {

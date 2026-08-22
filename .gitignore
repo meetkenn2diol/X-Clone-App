@@ -51,6 +51,7 @@ coverage/
 dist/
 web-build/
 *.expo-source/
+expo-env.d.ts
 
 # Native build outputs & bundles (EAS / Local builds)
 *.apk

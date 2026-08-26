@@ -3,11 +3,22 @@ import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { useSSO } from "@clerk/expo";
 import type { OAuthStrategy } from "@clerk/expo/types";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Alert, Platform } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
+// Where the browser hands the OAuth result back to the app. Points at the
+// existing auth screen so no extra callback route (e.g. /continue) is needed.
+const OAUTH_REDIRECT_PATH = "(auth)/auth-index";
+
+/**
+ * Encapsulates Clerk SSO (Google / Apple) for the entire app.
+ *
+ * Returns an async handler that runs Clerk's `startSSOFlow`, activates the
+ * created session, and routes the user to the authenticated part of the app.
+ * Only one OAuth flow may run at a time (`loadingStrategy`).
+ */
 export const useSocialAuth = () => {
   const [loadingStrategy, setLoadingStrategy] =
     React.useState<OAuthStrategy | null>(null);
@@ -15,6 +26,8 @@ export const useSocialAuth = () => {
   const { startSSOFlow } = useSSO();
   const router = useRouter();
 
+  // Pre-warm the native browser on Android so the auth session opens faster,
+  // and cool it down when the hook unmounts.
   React.useEffect(() => {
     if (Platform.OS !== "android") return;
 
@@ -26,42 +39,42 @@ export const useSocialAuth = () => {
   }, []);
 
   const handleSocialAuth = async (strategy: OAuthStrategy) => {
+    // Disable both buttons while this strategy is submitting.
     setLoadingStrategy(strategy);
 
     try {
       const { createdSessionId, setActive } = await startSSOFlow({
         strategy,
-
         redirectUrl: AuthSession.makeRedirectUri({
           scheme: "x-clone",
-          path: "/(auth)/continue",
+          path: OAUTH_REDIRECT_PATH,
         }),
       });
 
-      if (createdSessionId) {
-        await setActive!({
+      if (createdSessionId && setActive) {
+        await setActive({
           session: createdSessionId,
-
-          navigate: async ({ session, decorateUrl }) => {
+          navigate: async ({ session }) => {
+            // Clerk may return a session task (e.g. onboarding). By design there
+            // is no form for it — log it and continue to the app.
             if (session?.currentTask) {
-              console.log("Clerk session task:", session.currentTask);
+              console.error(
+                "Clerk session task encountered:",
+                session.currentTask,
+              );
               return;
             }
 
-            const url = decorateUrl("/");
-
-            if (url.startsWith("http")) {
-              window.location.href = url;
-            } else {
-              router.push(url as Href);
-            }
+            router.replace("/(tabs)");
           },
         });
       } else {
-        router.push("/continue");
+        console.error(
+          `Clerk ${strategy} flow finished without a createdSessionId.`,
+        );
       }
     } catch (error) {
-      console.error("Error in social authentication:", error);
+      console.error("Social authentication error:", error);
 
       const provider =
         strategy === "oauth_google"
@@ -72,15 +85,12 @@ export const useSocialAuth = () => {
 
       Alert.alert(
         "Sign In Failed",
-        `Failed to sign in with ${provider}. Please try again.`,
+        `Failed to continue with ${provider}. Please try again.`,
       );
     } finally {
       setLoadingStrategy(null);
     }
   };
 
-  return {
-    loadingStrategy,
-    handleSocialAuth,
-  };
+  return { handleSocialAuth, loadingStrategy };
 };

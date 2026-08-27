@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useSocialAuth } from "@/hooks/useSocialAuth";
 import {
   ActivityIndicator,
@@ -19,9 +20,17 @@ export default function AuthIndexScreen() {
   const { handleSocialAuth, loadingStrategy, resetSocialAuth } =
     useSocialAuth();
 
+  React.useEffect(() => {
+    console.log("AUTH INDEX MOUNTED");
+    return () => {
+      console.log("AUTH INDEX UNMOUNTED");
+    };
+  }, []);
+
   const isGoogleLoading = loadingStrategy === "oauth_google";
   const isAppleLoading = loadingStrategy === "oauth_apple";
   const isAnyLoading = loadingStrategy !== null;
+
 
   return (
     <KeyboardAvoidingView

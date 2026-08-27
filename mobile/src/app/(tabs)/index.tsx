@@ -6,8 +6,10 @@ export default function Home() {
   const { signOut } = useAuth();
 
   const handleSignOut = async () => {
+    console.log("========== SIGN OUT START ==========");
     try {
       await signOut();
+      console.log("========== SIGN OUT COMPLETE ==========");
       router.replace("/(auth)/auth-index");
     } catch (error) {
       console.error("Error signing out:", error);

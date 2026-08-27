@@ -1,7 +1,8 @@
 import * as React from "react";
 import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
-import { useAuth, useSSO } from "@clerk/expo";
+import { useAuth, useClerk } from "@clerk/expo";
+import { useSSO } from "@clerk/expo/experimental";
 import type { OAuthStrategy } from "@clerk/expo/types";
 import { useRouter } from "expo-router";
 import { Alert, Platform } from "react-native";
@@ -28,6 +29,7 @@ export const useSocialAuth = () => {
     React.useState<OAuthStrategy | null>(null);
 
   const { startSSOFlow } = useSSO();
+  const { setActive } = useClerk();
   const { isSignedIn, signOut } = useAuth();
   const router = useRouter();
 
@@ -77,64 +79,65 @@ export const useSocialAuth = () => {
       // Disable both buttons while this strategy is submitting.
       setLoadingStrategy(strategy);
 
+      console.log("========== START SSO ==========");
+      console.log("strategy:", strategy);
+      console.log("attempt:", attempt);
+
       try {
         const redirectUrl = AuthSession.makeRedirectUri({
           scheme: "x-clone",
           path: OAUTH_REDIRECT_PATH,
         });
 
-        console.error("OAUTH REDIRECT URL:", redirectUrl);
-        console.error("===== OAUTH START =====");
-        console.error("Strategy:", strategy);
-        console.error("Redirect URL:", redirectUrl);
-
         const result = await startSSOFlow({
           strategy,
           redirectUrl,
         });
 
-        console.error("===== OAUTH RESULT =====");
-        console.error(JSON.stringify(result));
-        console.error("createdSessionId:", result.createdSessionId);
-        console.error("hasSetActive:", !!result.setActive);
-        console.error("authSessionResult:", result.authSessionResult);
-        console.error("signIn status:", result.signIn?.status);
-        console.error("signUp status:", result.signUp?.status);
-        console.error(
+        const sessionId =
+          result.createdSessionId ||
+          result.signIn?.createdSessionId ||
+          result.signUp?.createdSessionId ||
+          (result.signIn as any)?.existingSession?.sessionId ||
+          (result.signUp as any)?.existingSession?.sessionId ||
+          null;
+
+        console.log("========== SSO RESULT ==========");
+        console.log("createdSessionId:", sessionId);
+        console.log("authSessionResult:", result.authSessionResult);
+        console.log("signIn status:", result.signIn?.status);
+        console.log("signUp status:", result.signUp?.status);
+        console.log(
           "firstFactor status:",
           result.signIn?.firstFactorVerification?.status,
         );
-        console.error("===== END OAUTH RESULT =====");
+        console.log("========== END SSO RESULT ==========");
 
         // The flow may have been reset while awaiting this result. A stale
         // attempt must never read createdSessionId or call setActive.
         if (attemptRef.current !== attempt) {
-          console.error(
+          console.log(
             `Ignoring stale ${strategy} OAuth result (attempt was reset).`,
           );
           return;
         }
 
-        const {
-          createdSessionId,
-          setActive,
-          authSessionResult,
-        } = result;
+        const authSessionResult = result.authSessionResult;
 
-        // If no createdSessionId was returned, check if browser session was dismissed/cancelled
-        if (!createdSessionId || !setActive) {
+        // If no sessionId was returned, check if browser session was dismissed/cancelled
+        if (!sessionId) {
           if (
             authSessionResult?.type === "dismiss" ||
             authSessionResult?.type === "cancel"
           ) {
-            console.error(
+            console.log(
               `OAuth browser session was ${authSessionResult.type}ed by user.`,
             );
             return;
           }
 
-          console.error(
-            `Clerk ${strategy} flow finished without a createdSessionId.`,
+          console.log(
+            `Clerk ${strategy} flow finished without a valid session.`,
           );
           return;
         }
@@ -142,40 +145,42 @@ export const useSocialAuth = () => {
         // Re-verify right before activating the session: a reset could have
         // happened after the startSSOFlow resolved and before we got here.
         if (attemptRef.current !== attempt) {
-          console.error(
+          console.log(
             `Aborting stale ${strategy} session activation (attempt was reset).`,
           );
           return;
         }
 
-        await setActive({
-          session: createdSessionId,
-          navigate: async ({ session }) => {
-            // Guard inside the navigate callback too: setActive may resolve
-            // after a reset, so never let a stale attempt touch the app.
-            if (attemptRef.current !== attempt) {
-              return;
-            }
+        if (setActive) {
+          await setActive({
+            session: sessionId,
+            navigate: async ({ session }) => {
+              // Guard inside the navigate callback too: setActive may resolve
+              // after a reset, so never let a stale attempt touch the app.
+              if (attemptRef.current !== attempt) {
+                return;
+              }
 
-            // Clerk may return a session task (e.g. onboarding). By design
-            // there is no form for it — log it and continue to the app.
-            if (session?.currentTask) {
-              console.error(
-                "Clerk session task encountered:",
-                session.currentTask,
-              );
-              return;
-            }
+              // Clerk may return a session task (e.g. onboarding). By design
+              // there is no form for it — log it and continue to the app.
+              if (session?.currentTask) {
+                console.log(
+                  "Clerk session task encountered:",
+                  session.currentTask,
+                );
+                return;
+              }
 
-            // Final guard before navigating: a stale attempt must never push
-            // the user into the authenticated area.
-            if (attemptRef.current !== attempt) {
-              return;
-            }
+              // Final guard before navigating: a stale attempt must never push
+              // the user into the authenticated area.
+              if (attemptRef.current !== attempt) {
+                return;
+              }
 
-            router.replace("/(tabs)");
-          },
-        });
+              router.replace("/(tabs)");
+            },
+          });
+        }
       } catch (error) {
         // Ignore failures from attempts that have since been reset. A stale
         // rejection must never surface a "Sign In Failed" alert.
@@ -203,8 +208,8 @@ export const useSocialAuth = () => {
         }
       }
     },
-    [router, startSSOFlow],
+    [router, setActive, startSSOFlow],
   );
 
   return { handleSocialAuth, loadingStrategy, resetSocialAuth };
-};
+};

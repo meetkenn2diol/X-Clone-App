@@ -16,7 +16,8 @@ import {
  * an OAuth flow is in progress so two flows never start at once.
  */
 export default function AuthIndexScreen() {
-  const { handleSocialAuth, loadingStrategy } = useSocialAuth();
+  const { handleSocialAuth, loadingStrategy, resetSocialAuth } =
+    useSocialAuth();
 
   const isGoogleLoading = loadingStrategy === "oauth_google";
   const isAppleLoading = loadingStrategy === "oauth_apple";
@@ -87,13 +88,23 @@ export default function AuthIndexScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Terms & privacy */}
-        <Text className="text-center text-gray-500 text-xs leading-4 mt-8 px-4">
-          By continuing, you agree to our{" "}
-          <Text className="text-blue-500">Terms</Text>
-          {" and "}
-          <Text className="text-blue-500">Privacy Policy</Text>.
-        </Text>
+        {/* Terms & privacy + Reset */}
+        <View className="flex-row items-center justify-center mt-8 px-4 gap-3">
+          <Text className="flex-1 text-center text-gray-500 text-xs leading-4">
+            By continuing, you agree to our{" "}
+            <Text className="text-blue-500">Terms</Text>
+            {" and "}
+            <Text className="text-blue-500">Privacy Policy</Text>.
+          </Text>
+
+          <TouchableOpacity
+            onPress={resetSocialAuth}
+            className="border border-gray-300 rounded-full px-3 py-1.5"
+            accessibilityRole="button"
+          >
+            <Text className="text-gray-500 text-xs font-medium">Reset</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );

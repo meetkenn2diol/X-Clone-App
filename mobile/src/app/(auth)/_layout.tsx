@@ -26,6 +26,7 @@ export default function AuthLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="auth-index" />
+      <Stack.Screen name="oauth-callback" />
     </Stack>
   );
 }

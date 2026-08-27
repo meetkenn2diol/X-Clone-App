@@ -1,32 +1,19 @@
-import { useAuth } from "@clerk/expo";
-import { Redirect, Stack } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
+import { Stack } from "expo-router";
 
 /**
- * Guards the authentication screens.
+ * Authentication screen layout.
  *
- * While Clerk is still loading we show a spinner and never render the auth UI.
- * If the user is already signed in we redirect straight to the tabs group.
+ * The auth ↔ tabs transition is owned exclusively by the root layout's
+ * `Stack.Protected` guards — this layout no longer performs any redirect.
+ * When the user signs in, the root layout's guard removes the entire
+ * `(auth)` group from the navigation state, so pressing Back can never
+ * return to these screens.
  */
 export default function AuthLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
-
-  if (!isLoaded) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (isSignedIn) {
-    return <Redirect href="/(tabs)" />;
-  }
-
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="auth-index" />
-      <Stack.Screen name="oauth-callback" />
     </Stack>
   );
 }
+

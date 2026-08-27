@@ -13,24 +13,30 @@ import {
 /**
  * Single-screen sign in with Clerk SSO — Google and Apple only.
  *
- * Each provider has its own loading state, and both buttons are disabled while
- * an OAuth flow is in progress so two flows never start at once.
+ * This screen owns the authentication attempt lifecycle and provider-specific
+ * loading state. Each provider has its own spinner, and both buttons are
+ * disabled while an OAuth flow is in progress so two flows never start at once.
+ * It is also the native OAuth callback destination: the flow redirects back to
+ * this same screen, which stays mounted (spinner running) while Clerk resolves
+ * the session. Navigation after a successful sign-in is handled exclusively
+ * by the root layout's `Stack.Protected` guard (via `isSignedIn`), never here.
  */
 export default function AuthIndexScreen() {
   const { handleSocialAuth, loadingStrategy, resetSocialAuth } =
     useSocialAuth();
 
+  // Debugging lifecycle: this screen must genuinely unmount when the session
+  // activates, because the root layout removes the whole (auth) route tree.
   React.useEffect(() => {
-    console.log("AUTH INDEX MOUNTED");
+    console.log("========== AUTH INDEX MOUNTED ==========");
     return () => {
-      console.log("AUTH INDEX UNMOUNTED");
+      console.log("========== AUTH INDEX UNMOUNTED ==========");
     };
   }, []);
 
   const isGoogleLoading = loadingStrategy === "oauth_google";
   const isAppleLoading = loadingStrategy === "oauth_apple";
   const isAnyLoading = loadingStrategy !== null;
-
 
   return (
     <KeyboardAvoidingView

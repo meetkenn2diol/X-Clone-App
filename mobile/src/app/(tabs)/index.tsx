@@ -1,5 +1,4 @@
 import { useAuth } from "@clerk/expo";
-import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Home() {
@@ -10,7 +9,9 @@ export default function Home() {
     try {
       await signOut();
       console.log("========== SIGN OUT COMPLETE ==========");
-      router.replace("/(auth)/auth-index");
+      // No manual navigation here: the root layout's Stack.Protected guard
+      // sees isSignedIn flip to false and removes the entire (tabs) group,
+      // making (auth) available again.
     } catch (error) {
       console.error("Error signing out:", error);
     }

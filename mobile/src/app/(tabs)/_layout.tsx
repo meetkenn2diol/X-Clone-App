@@ -1,22 +1,15 @@
-import { useAuth } from "@clerk/expo";
-import { Redirect, Tabs } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
+import { Tabs } from "expo-router";
 
+/**
+ * Tab navigator layout.
+ *
+ * The auth ↔ tabs transition is owned exclusively by the root layout's
+ * `Stack.Protected` guards — this layout no longer performs any redirect.
+ * When the user signs out, the root layout's guard removes the entire
+ * `(tabs)` group from the navigation state, so pressing Back can never
+ * return to these screens.
+ */
 export default function TabsLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
-
-  if (!isLoaded) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (!isSignedIn) {
-    return <Redirect href="/(auth)/auth-index" />;
-  }
-
   return (
     <Tabs>
       <Tabs.Screen
@@ -28,4 +21,5 @@ export default function TabsLayout() {
       />
     </Tabs>
   );
-}
+}
+

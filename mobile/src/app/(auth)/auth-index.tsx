@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useSocialAuth } from "@/hooks/useSocialAuth";
+import { useAuthFlowStore } from "@/stores/authFlowStore";
 import {
   ActivityIndicator,
   Image,
@@ -22,8 +23,13 @@ import {
  * by the root layout's `Stack.Protected` guard (via `isSignedIn`), never here.
  */
 export default function AuthIndexScreen() {
-  const { handleSocialAuth, loadingStrategy, resetSocialAuth } =
-    useSocialAuth();
+  const { handleSocialAuth, resetSocialAuth } = useSocialAuth();
+
+  // Local OAuth-flow loading state comes directly from the Zustand store (the
+  // single source of truth), not from React component state. This screen is
+  // BOTH the authentication UI and the OAuth callback destination, so it never
+  // resets this state merely because it mounts or gains focus.
+  const loadingStrategy = useAuthFlowStore((state) => state.loadingStrategy);
 
   // Debugging lifecycle: this screen must genuinely unmount when the session
   // activates, because the root layout removes the whole (auth) route tree.
@@ -57,7 +63,7 @@ export default function AuthIndexScreen() {
         {/* OAuth buttons */}
         <View className="gap-4">
           <TouchableOpacity
-            onPress={() => handleSocialAuth("oauth_google")}
+            onPress={() =>{resetSocialAuth(); handleSocialAuth("oauth_google")}}
             disabled={isAnyLoading}
             className="flex-row items-center justify-center bg-white border border-gray-300 rounded-full py-3.5"
             accessibilityRole="button"
@@ -80,7 +86,7 @@ export default function AuthIndexScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => handleSocialAuth("oauth_apple")}
+            onPress={() => {resetSocialAuth(); handleSocialAuth("oauth_apple")}}
             disabled={isAnyLoading}
             className="flex-row items-center justify-center bg-white border border-gray-300 rounded-full py-3.5"
             accessibilityRole="button"

@@ -1,4 +1,5 @@
 import { useAuth } from "@clerk/expo";
+import { useAuthFlowStore } from "@/stores/authFlowStore";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Home() {
@@ -9,9 +10,12 @@ export default function Home() {
     try {
       await signOut();
       console.log("========== SIGN OUT COMPLETE ==========");
-      // No manual navigation here: the root layout's Stack.Protected guard
-      // sees isSignedIn flip to false and removes the entire (tabs) group,
-      // making (auth) available again.
+      // Clerk clears the session; this clears ONLY our local OAuth-flow state
+      // and invalidates any stale in-flight attempt. Clerk remains the source
+      // of truth for authentication — nothing about the session is stored in
+      // Zustand. No manual navigation: the (auth) layout / root Stack.Protected
+      // guard sees isSignedIn flip to false and returns to the auth screens.
+      useAuthFlowStore.getState().reset();
     } catch (error) {
       console.error("Error signing out:", error);
     }

@@ -1,21 +1,23 @@
-import { useAuth } from "@clerk/expo";
-import { Redirect } from "expo-router";
+import { useAuth } from '@clerk/expo';
+import { Redirect } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 
-/**
- * Redirect entry point — the single navigation authority for the
- * auth → tabs (and tabs → auth) transition.
- *
- * `Stack.Protected` in the root layout guarantees that only the
- * appropriate group is mounted, so a plain `Redirect` here is enough:
- * the protected group is guaranteed to be available.
- */
+// CRITICAL: This ensures the web browser can complete the auth session 
+// and resolve the startSSOFlow promise when the app is reopened from the browser.
+WebBrowser.maybeCompleteAuthSession();
+
 export default function Index() {
-  const { isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    // You can replace this with a custom loading spinner component
+    return null; 
+  }
 
   if (isSignedIn) {
     return <Redirect href="/(tabs)" />;
   }
 
+  // Redirect to the auth screen
   return <Redirect href="/(auth)/auth-index" />;
 }
-

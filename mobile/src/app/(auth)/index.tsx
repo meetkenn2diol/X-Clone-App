@@ -1,81 +1,65 @@
 import { useSocialAuth } from "@/hooks/useSocialAuth";
-import { ActivityIndicator, Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Index() {
-  const { handleSocialAuth, isLoading } = useSocialAuth();
+export default function AuthScreen() {
+  const { handleSocialAuth, isLoading, loadingStrategy } = useSocialAuth();
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="flex-1 px-8 justify-between">
-        <View className="flex-1 justify-center">
-          {/* DEMO IMAGE */}
-          <View className="items-center">
-            <Image
-              source={require("@/assets/images/auth2.png")}
-              className="size-96"
-              resizeMode="contain"
-            />
-          </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* Auth Image */}
+        <Image
+          source={require("@/assets/images/auth2.png")}
+          style={styles.image}
+          resizeMode="contain"
+        />
 
-          <View className="flex-col gap-2">
-            {/* GOOGLE SIGNIN BTN */}
-            <TouchableOpacity
-              className="flex-row items-center justify-center bg-white border border-gray-300 rounded-full py-3 px-6"
-              onPress={() => handleSocialAuth("oauth_google")}
-              disabled={isLoading}
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.1,
-                shadowRadius: 2,
-                elevation: 2,
-              }}
-            >
-              {isLoading ? (
-                <ActivityIndicator size="small" color="#4285F4" />
-              ) : (
-                <View className="flex-row items-center justify-center">
-                  <Image
-                    source={require("@/assets/images/google.png")}
-                    className="size-10 mr-3"
-                    resizeMode="contain"
-                  />
-                  <Text className="text-black font-medium text-base">Continue with Google</Text>
-                </View>
-              )}
-            </TouchableOpacity>
+        <View style={styles.bottomContainer}>
+          {/* Google Button */}
+          <TouchableOpacity
+            style={styles.pillButton}
+            onPress={() => handleSocialAuth("oauth_google")}
+          >
+            {isLoading && loadingStrategy === "oauth_google" ? (
+              <ActivityIndicator color={"#000"} />
+            ) : (
+              <Image
+                source={require("@/assets/images/google.png")}
+                style={styles.icon}
+              />
+            )}
+            <Text style={styles.buttonText}>Continue with Google</Text>
+          </TouchableOpacity>
 
-            {/* APPLE SIGNIN ICON */}
-            <TouchableOpacity
-              className="flex-row items-center justify-center bg-white border border-gray-300 rounded-full py-3 px-6"
-              onPress={() => handleSocialAuth("oauth_apple")}
-              disabled={isLoading}
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.1,
-                shadowRadius: 2,
-                elevation: 2,
-              }}
-            >
-              {isLoading ? (
-                <ActivityIndicator size="small" color="#000" />
-              ) : (
-                <View className="flex-row items-center justify-center">
-                  <Image
-                    source={require("@/assets/images/apple.png")}
-                    className="size-8 mr-3"
-                    resizeMode="contain"
-                  />
-                  <Text className="text-black font-medium text-base">Continue with Apple</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
+          {/* Apple Button */}
+          <TouchableOpacity
+            style={styles.pillButton}
+            onPress={() => handleSocialAuth("oauth_apple")}
+          >
+            {isLoading && loadingStrategy === "oauth_apple" ? (
+              <ActivityIndicator color={"#000"} />
+            ) : (
+              <Image
+                source={require("@/assets/images/apple.png")}
+                style={styles.icon}
+                resizeMode="contain"
+              />
+            )}
+            <Text style={styles.buttonText}>Continue with Apple</Text>
+          </TouchableOpacity>
 
-          {/* Terms and Privacy */}
+          {/*Terms, Privacy, and Cookie Text */}
           <Text className="text-center text-gray-500 text-xs leading-4 mt-6 px-2">
-            By signing up, you agree to our <Text className="text-blue-500">Terms</Text>
+            By signing up, you agree to our{" "}
+            <Text className="text-blue-500">Terms</Text>
             {", "}
             <Text className="text-blue-500">Privacy Policy</Text>
             {", and "}
@@ -83,6 +67,50 @@ export default function Index() {
           </Text>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  image: {
+    width: "100%",
+    height: "50%",
+    marginBottom: 24,
+  },
+  bottomContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  pillButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    marginBottom: 16,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    marginRight: 12,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+  },
+});

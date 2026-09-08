@@ -5,6 +5,7 @@
   "dependencies": {
     "@clerk/expo": "^4.5.2",
     "@expo/ui": "~57.0.10",
+    "@expo/vector-icons": "^15.0.2",
     "babel-preset-expo": "^57.0.7",
     "expo": "~57.0.12",
     "expo-auth-session": "~57.0.8",

@@ -1,4 +1,5 @@
 import { useSocialAuth } from "@/hooks/useSocialAuth";
+import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
 import {
   View,
   Text,
@@ -10,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AuthScreen() {
+  useWarmUpBrowser();
   const { handleSocialAuth, isLoading, loadingStrategy } = useSocialAuth();
 
   return (

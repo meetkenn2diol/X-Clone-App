@@ -15,7 +15,7 @@ export const useSocialAuth = () => {
     try {
       const { createdSessionId, setActive } = await startSSOFlow({
         strategy,
-        redirectUrl: Linking.createURL("(auth)", { scheme: "xclone" }),
+        redirectUrl: Linking.createURL("/(auth)/sso-callback"),
       });
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId });

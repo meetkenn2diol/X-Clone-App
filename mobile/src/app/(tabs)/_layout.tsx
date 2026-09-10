@@ -31,7 +31,6 @@ const TabsLayout = () => {
         name="search"
         options={{
           title: "",
-
           tabBarIcon: ({ color, size }) => <Feather name="search" size={size} color={color} />,
         }}
       />

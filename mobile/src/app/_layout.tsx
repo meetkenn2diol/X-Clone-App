@@ -3,6 +3,7 @@ import { tokenCache } from "@clerk/expo/token-cache";
 import { Stack } from "expo-router";
 import { ActivityIndicator, Image, View } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import "../../global.css"
 
 WebBrowser.maybeCompleteAuthSession();
 

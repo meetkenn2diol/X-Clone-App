@@ -4,6 +4,9 @@ import { Stack } from "expo-router";
 import { ActivityIndicator, Image, Platform, View } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import "../../global.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 if (Platform.OS !== "web") {
   WebBrowser.maybeCompleteAuthSession();
@@ -18,7 +21,9 @@ if (!publishableKey) {
 export default function RootLayout() {
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <RootNavigator />
+      <QueryClientProvider client={queryClient}>
+        <RootNavigator />
+      </QueryClientProvider>
     </ClerkProvider>
   );
 }

@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#ffffff"
   },
   image: {
     width: "100%",

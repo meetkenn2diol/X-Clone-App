@@ -1,15 +1,17 @@
-import axios, { AxiosInstance, create } from "axios";
+import { AxiosInstance, create } from "axios";
 import { useAuth } from "@clerk/expo";
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "https://x-clone-6jwm026mb-kenneac.vercel.app/api";
+const API_BASE_URL = "https://x-clone-app-rho.vercel.app/api";//"http://localhost:5001/api" //"https://x-clone-app-rho.vercel.app/api";
 
 export const createApiClient = (getToken: () => Promise<string | null>): AxiosInstance => {
-  const api = create({ baseURL: API_BASE_URL });
+  const api = create({
+    baseURL: API_BASE_URL,
+  });
 
   //get the users token
   api.interceptors.request.use(async (config) => {
     const token = await getToken();
-    if (token) {config.headers.Authorization = `Bearer ${token}`;}
+    if (token) {config.headers.Authorization = `Bearer ${token}`;} 
     return config;
   });
   return api;
@@ -17,7 +19,6 @@ export const createApiClient = (getToken: () => Promise<string | null>): AxiosIn
 
 export const useApiClient = (): AxiosInstance => {
   const { getToken } = useAuth();
-  console.log("token:", getToken);
   return createApiClient(getToken);
 };
 
